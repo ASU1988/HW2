@@ -156,6 +156,6 @@ int main(int argc, char *argv[])
 
     printf("\nThe file %s was created\n", argv[3]);
 
-    return 0;
+    return 1;
 }
 
