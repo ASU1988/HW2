@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define THIRD     2
 #define SECOND    1
@@ -98,13 +101,19 @@ int main(int argc, char *argv[])
     //  10 Закрываем выходной файл.
     /*****************************************************************/
 
-
     int Unicod_simbol;
     unsigned char UTF8_simbol[3] = {0};
-    int n = 0;
+    struct stat buff;
+
+
+    if(argc != 4)
+    {
+    	printf("Please enter command line arguments in the form: Program_name File_name Type_of_encoding Out_file\n");
+    	return(0);
+    }
 
     FILE *fin = fopen(argv[1], "r");
-
+    
     if(fin == NULL)
     {
         printf("ERROR openning file\n");
@@ -117,18 +126,13 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    fseek(fin, 0, SEEK_END); // Переводим курсор файла в конец файла
-    n = ftell(fin);
-    fseek(fin, 0, SEEK_SET); // Переводим курсор файла в начало файла
-
-    unsigned char *p = (unsigned char*)malloc(n * sizeof(unsigned char));
-
+    fstat (fileno (fin), &buff);
+    
+    unsigned char *p = (unsigned char*)malloc(buff.st_size * sizeof(unsigned char));
+    
     // Читаем символы, сохраняем их в подготовленный масив, и закрываем файл
-    fread(p, sizeof(unsigned char), n, fin);
+    fread(p, sizeof(unsigned char), buff.st_size, fin);
     fclose(fin);
-
-    //for(int i = 0; i < n; i++)
-    //    printf("%d\t", p[i]);
 
     // Создаем выходной файл
     FILE *fout = fopen(argv[3], "w");
@@ -139,7 +143,7 @@ int main(int argc, char *argv[])
     }
 
     // Записываем в файл UTF8 символы
-    for(int i = 0; i < n; i++)
+    for(int i = 0; i < buff.st_size; i++)
     {
         Unicod_simbol = (!strcmp(argv[2], "cp1251"))     ?  ConvCp1251ToUni(p[i])    :
                         (!strcmp(argv[2], "iso-8859-5")) ?  ConvIso88595ToUni(p[i])  :
@@ -153,6 +157,7 @@ int main(int argc, char *argv[])
             fputc(UTF8_simbol[j], fout);
     }
     fclose(fout);
+    free(p);
 
     printf("\nThe file %s was created\n", argv[3]);
 
