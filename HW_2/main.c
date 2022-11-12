@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #define THIRD     2
 #define SECOND    1
@@ -113,7 +111,7 @@ int main(int argc, char *argv[])
     }
 
     FILE *fin = fopen(argv[1], "r");
-    
+
     if(fin == NULL)
     {
         printf("ERROR openning file\n");
@@ -127,9 +125,9 @@ int main(int argc, char *argv[])
     }
 
     fstat (fileno (fin), &buff);
-    
+
     unsigned char *p = (unsigned char*)malloc(buff.st_size * sizeof(unsigned char));
-    
+
     // Читаем символы, сохраняем их в подготовленный масив, и закрываем файл
     fread(p, sizeof(unsigned char), buff.st_size, fin);
     fclose(fin);
